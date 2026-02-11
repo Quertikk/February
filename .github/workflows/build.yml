@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        # Ставим только то, что в файле requirements (версию 0.22.1)
+        # Строго устанавливаем версию 0.22.1 из файла
         pip install -r requirements.txt
 
     - name: Setup Java
@@ -37,11 +37,13 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
+        flutter-version: '3.19.0' 
+        # Я зафиксировал версию Flutter, которая дружит со старым Flet
 
     - name: Build APK
       run: |
-        # Убрали лишний флаг --assets-dir, который вызывал ошибку
-        flet build apk --include-packages flet -vv
+        # Самая простая команда без лишних флагов, которые вызывают ошибки
+        flet build apk -vv
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
