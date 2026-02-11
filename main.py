@@ -3,7 +3,7 @@ import random
 import time
 
 def main(page: ft.Page):
-    # --- НАСТРОЙКИ (USTAWIENIA) ---
+    # --- НАСТРОЙКИ ---
     page.title = "Walentynka"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
@@ -15,33 +15,13 @@ def main(page: ft.Page):
     # --- ПЕРЕМЕННЫЕ ---
     state = {"score": 0, "q_index": 0}
 
-    # --- ВОПРОСЫ (PYTANIA) ---
+    # --- ВОПРОСЫ ---
     questions = [
-        {
-            "q": "Kiedy się urodziłem?", 
-            "answers": ["8 lutego", "12 marca", "23 kwietnia", "12 grudnia"], 
-            "correct": 0
-        },
-        {
-            "q": "Kiedy był nasz pierwszy pocałunek?", 
-            "answers": ["6 maja", "7 kwietnia", "12 września", "4 maja"], 
-            "correct": 0
-        },
-        {
-            "q": "Kto odegrał główną rolę w naszym związku?", 
-            "answers": ["Trener", "Jakub", "Luna", "Moly"], 
-            "correct": 2
-        },
-        {
-            "q": "Mój ulubiony słodycz?", 
-            "answers": ["Lody", "Nutella", "Zefir", "Bambus"], 
-            "correct": 2
-        },
-        {
-            "q": "Kto jest najlepszą dziewczyną na świecie?", 
-            "answers": ["Ty", "Ty", "ty", "Zdecydowanie Ty"], 
-            "correct": [0, 1, 2, 3] 
-        }
+        {"q": "Kiedy się urodziłem?", "answers": ["8 lutego", "12 marca", "23 kwietnia", "12 grudnia"], "correct": 0},
+        {"q": "Kiedy był nasz pierwszy pocałunek?", "answers": ["6 maja", "7 kwietnia", "12 września", "4 maja"], "correct": 0},
+        {"q": "Kto odegrał główną rolę w naszym związku?", "answers": ["Trener", "Jakub", "Luna", "Moly"], "correct": 2},
+        {"q": "Mój ulubiony słodycz?", "answers": ["Lody", "Nutella", "Zefir", "Bambus"], "correct": 2},
+        {"q": "Kto jest najlepszą dziewczyną na świecie?", "answers": ["Ty", "Ty", "ty", "Zdecydowanie Ty"], "correct": [0, 1, 2, 3]}
     ]
 
     phrases = ["Pudło!", "Spróbuj jeszcze raz!", "Tutaj jestem!", "Nie złapiesz mnie!", "Ojej!", "He-he"]
@@ -51,13 +31,12 @@ def main(page: ft.Page):
     def check_answer(e):
         clicked = e.control.data
         q_data = questions[state["q_index"]]
-        correct_answer = q_data["correct"]
+        correct = q_data["correct"]
 
         is_correct = False
-        if isinstance(correct_answer, list):
-            if clicked in correct_answer:
-                is_correct = True
-        elif clicked == correct_answer:
+        if isinstance(correct, list):
+            if clicked in correct: is_correct = True
+        elif clicked == correct:
             is_correct = True
 
         if is_correct:
@@ -69,7 +48,7 @@ def main(page: ft.Page):
             page.snack_bar.open = True
         
         page.update()
-        time.sleep(0.3)
+        time.sleep(0.2)
         state["q_index"] += 1
         
         if state["q_index"] < len(questions):
@@ -99,10 +78,10 @@ def main(page: ft.Page):
         page.add(
             ft.Column(
                 [
-                    # Ссылка на гифку (Котики обнимаются)
-                    ft.Image(src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW56eW56eW56eW56eW56eW56eW56/MDJ9IbxxvDUQM/giphy.gif", width=300, border_radius=20),
+                    # ВМЕСТО ГИФКИ - БОЛЬШОЕ СЕРДЦЕ (Встроенная иконка)
+                    ft.Icon(name=ft.icons.FAVORITE, size=100, color="red"),
                     ft.Text("JEJ! KOCHAM CIĘ JULLI! ❤️", size=30, color="red", weight="bold", text_align="center"),
-                    ft.Text("Twój Vall ❤️", size=18, weight="bold")
+                    ft.Text("Twój Vall! ❤️", size=18, weight="bold")
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
@@ -119,6 +98,7 @@ def main(page: ft.Page):
         items = [
             ft.Text(f"Pytanie {state['q_index']+1} z {len(questions)}", color="grey"),
             ft.Text(f"Róże: {state['score']} 🌹", size=20, color="red", weight="bold"),
+            # Убрали Border, просто белый фон
             ft.Container(
                 content=ft.Text(q["q"], size=22, weight="bold", text_align="center"),
                 padding=20,
@@ -152,8 +132,8 @@ def main(page: ft.Page):
         card = ft.Container(
             content=ft.Column(
                 [
-                    # Ссылка на гифку (Билет/Сердечко)
-                    ft.Image(src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2NvYzBwOHhxaGx6MGM3Z3Jxa3hleGdqMDVxeWZ3cjk0cDZtZmVnbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9hwRt0PfaMLFgbN7Qs/giphy.gif", width=150),
+                    # ВМЕСТО ГИФКИ - ИКОНКА БИЛЕТА
+                    ft.Icon(name=ft.icons.CARD_GIFTCHARD, size=80, color="pink"),
                     ft.Text("Bilet do Szczęścia", size=20, weight="bold"),
                     ft.Text(f"Cena: 1 róża", color="grey")
                 ],
@@ -161,8 +141,8 @@ def main(page: ft.Page):
             ),
             padding=20,
             bgcolor="white",
-            border_radius=15,
-            border=ft.border.all(2, "pink") 
+            border_radius=15
+            # Убрали border, чтобы не было конфликтов версий
         )
         
         buy_btn = ft.ElevatedButton(
@@ -195,33 +175,3 @@ def main(page: ft.Page):
             color="white",
             on_hover=move_btn,
             on_click=move_btn,
-            width=80,
-            height=40,
-            left=100, 
-            top=300
-        )
-
-        game_area = ft.Stack(
-            [
-                ft.Container(
-                    content=ft.Text("Zostaniesz moją Walentynką?", size=26, weight="bold", text_align="center", color="pink900"),
-                    top=50, left=0, right=0, alignment=ft.alignment.center
-                ),
-                ft.Container(
-                    content=btn_yes,
-                    top=200, left=0, right=0, alignment=ft.alignment.center
-                ),
-                btn_no
-            ],
-            width=350,
-            height=600
-        )
-        
-        page.add(game_area)
-        page.update()
-
-    show_quiz()
-
-# ВАЖНО: Я УБРАЛ assets_dir="assets", потому что мы используем интернет.
-# Именно из-за этой настройки был белый экран (он искал папку, которой нет в телефоне).
-ft.app(target=main)
