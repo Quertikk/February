@@ -99,10 +99,10 @@ def main(page: ft.Page):
         page.add(
             ft.Column(
                 [
-                    # Картинка из папки assets
-                    ft.Image(src="/love.gif", width=300, border_radius=20),
+                    # Ссылка на гифку (Котики обнимаются)
+                    ft.Image(src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3R6eW56eW56eW56eW56eW56eW56eW56/MDJ9IbxxvDUQM/giphy.gif", width=300, border_radius=20),
                     ft.Text("JEJ! KOCHAM CIĘ JULLI! ❤️", size=30, color="red", weight="bold", text_align="center"),
-                    ft.Text("Twój vall ❤️", size=18, weight="bold")
+                    ft.Text("Twój Vall ❤️", size=18, weight="bold")
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
@@ -126,10 +126,6 @@ def main(page: ft.Page):
                 border_radius=15
             )
         ]
-        
-        # Добавляем картинку только на первом вопросе (или на всех, если хочешь)
-        # Если хочешь, чтобы кот был всегда, раскомментируй строку ниже:
-        # items.insert(0, ft.Image(src="/cat.gif", width=150, border_radius=15))
 
         for i, ans in enumerate(q["answers"]):
             items.append(
@@ -156,8 +152,8 @@ def main(page: ft.Page):
         card = ft.Container(
             content=ft.Column(
                 [
-                    # Картинка из папки assets
-                    ft.Image(src="/ticket.gif", width=150),
+                    # Ссылка на гифку (Билет/Сердечко)
+                    ft.Image(src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2NvYzBwOHhxaGx6MGM3Z3Jxa3hleGdqMDVxeWZ3cjk0cDZtZmVnbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9hwRt0PfaMLFgbN7Qs/giphy.gif", width=150),
                     ft.Text("Bilet do Szczęścia", size=20, weight="bold"),
                     ft.Text(f"Cena: 1 róża", color="grey")
                 ],
@@ -226,5 +222,6 @@ def main(page: ft.Page):
 
     show_quiz()
 
-# ВАЖНО: assets_dir="assets" говорит программе, где искать картинки
-ft.app(target=main, assets_dir="assets")
+# ВАЖНО: Я УБРАЛ assets_dir="assets", потому что мы используем интернет.
+# Именно из-за этой настройки был белый экран (он искал папку, которой нет в телефоне).
+ft.app(target=main)
