@@ -1,6 +1,6 @@
 import flet as ft
 import random
-import time
+import asyncio
 
 def main(page: ft.Page):
     # --- НАСТРОЙКИ ---
@@ -9,6 +9,7 @@ def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.bgcolor = "pink50"
     page.theme_mode = "light"
+    # на мобиле window_* обычно игнорируется, но не мешает
     page.window_width = 400
     page.window_height = 700
 
@@ -21,14 +22,22 @@ def main(page: ft.Page):
         {"q": "Kiedy był nasz pierwszy pocałunek?", "answers": ["6 maja", "7 kwietnia", "12 września", "4 maja"], "correct": 0},
         {"q": "Kto odegrał główną rolę w naszym związku?", "answers": ["Trener", "Jakub", "Luna", "Moly"], "correct": 2},
         {"q": "Mój ulubiony słodycz?", "answers": ["Lody", "Nutella", "Zefir", "Bambus"], "correct": 2},
-        {"q": "Kto jest najlepszą dziewczyną na świecie?", "answers": ["Ty", "Ty", "ty", "Zdecydowanie Ty"], "correct": [0, 1, 2, 3]}
+        {"q": "Kto jest najlepszą dziewczyną na świecie?", "answers": ["Ty", "Ty", "ty", "Zdecydowanie Ty"], "correct": [0,1,2,3]}
     ]
 
     phrases = ["Pudło!", "Spróbuj jeszcze raz!", "Tutaj jestem!", "Nie złapiesz mnie!", "Ojej!", "He-he"]
 
-    # --- ЛОГИКА ---
+    # --- Утилиты отображения ---
+    def clear_and_update():
+        page.controls.clear()
+        page.update()
 
-    def check_answer(e):
+    def show_snackbar(text: str, bgcolor: str = "grey"):
+        page.snack_bar = ft.SnackBar(ft.Text(text), bgcolor=bgcolor, open=True)
+        page.update()
+
+    # --- ЛОГИКА ---
+    async def check_answer(e):
         clicked = e.control.data
         q_data = questions[state["q_index"]]
         correct = q_data["correct"]
@@ -41,44 +50,42 @@ def main(page: ft.Page):
 
         if is_correct:
             state["score"] += 1
-            page.snack_bar = ft.SnackBar(ft.Text("Dobrze! +1 Róża 🌹"), bgcolor="green")
-            page.snack_bar.open = True
+            show_snackbar("Dobrze! +1 Róża 🌹", bgcolor="green")
         else:
-            page.snack_bar = ft.SnackBar(ft.Text("Źle! 🥀"), bgcolor="red")
-            page.snack_bar.open = True
-        
-        page.update()
-        time.sleep(0.2)
+            show_snackbar("Źle! 🥀", bgcolor="red")
+
+        # краткая пауза без блокировки UI
+        await asyncio.sleep(0.25)
         state["q_index"] += 1
-        
+
         if state["q_index"] < len(questions):
             show_quiz()
         else:
             show_shop()
 
-    def buy_ticket(e):
+    async def buy_ticket(e):
+        # если есть хоть одна роза — показываем финал, иначе даём "билет за piękne oczy" но всё равно переходим
         if state["score"] > 0:
             show_final()
         else:
-            page.snack_bar = ft.SnackBar(ft.Text("Masz bilet za piękne oczy ❤️"), bgcolor="pink")
-            page.snack_bar.open = True
-            page.update()
-            time.sleep(1)
+            show_snackbar("Masz bilet za piękne oczy ❤️", bgcolor="pink")
+            await asyncio.sleep(1)
             show_final()
 
     def move_btn(e):
-        e.control.top = random.randint(0, 400)
-        e.control.left = random.randint(0, 200)
+        # перемещаем кнопку (работает в Stack)
+        e.control.top = random.randint(0, 300)
+        e.control.left = random.randint(0, 150)
         e.control.text = random.choice(phrases)
+        # меняем стиль безопасно — используем допустимые цвета
         e.control.bgcolor = random.choice(["red", "orange", "grey"])
         page.update()
 
     def win(e):
-        page.clean()
+        clear_and_update()
         page.add(
             ft.Column(
                 [
-                    # ИСПРАВЛЕНО: используем строковое название иконки
                     ft.Icon(name="favorite", size=100, color="red"),
                     ft.Text("JEJ! KOCHAM CIĘ JULLI! ❤️", size=30, color="red", weight="bold", text_align="center"),
                     ft.Text("Twój Vall!", size=18, weight="bold")
@@ -90,59 +97,59 @@ def main(page: ft.Page):
         page.update()
 
     # --- ЭКРАНЫ ---
-
     def show_quiz():
-        page.clean()
+        clear_and_update()
         q = questions[state["q_index"]]
-        
-        items = [
-            ft.Text(f"Pytanie {state['q_index']+1} z {len(questions)}", color="grey"),
-            ft.Text(f"Róże: {state['score']} 🌹", size=20, color="red", weight="bold"),
-            ft.Container(
-                content=ft.Text(q["q"], size=22, weight="bold", text_align="center"),
-                padding=20,
-                bgcolor="white",
-                border_radius=15
-            )
-        ]
 
+        header = ft.Column(
+            [
+                ft.Text(f"Pytanie {state['q_index']+1} z {len(questions)}", color="grey"),
+                ft.Text(f"Róże: {state['score']} 🌹", size=20, color="red", weight="bold"),
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+        )
+
+        container = ft.Container(
+            content=ft.Text(q["q"], size=22, weight="bold", text_align="center"),
+            padding=20,
+            bgcolor="white",
+            border_radius=15,
+            margin=ft.margin.only(bottom=20)
+        )
+
+        btns = []
         for i, ans in enumerate(q["answers"]):
-            items.append(
+            btns.append(
                 ft.ElevatedButton(
                     text=ans,
-                    data=i, 
+                    data=i,
                     on_click=check_answer,
                     width=280,
-                    height=50
+                    height=50,
+                    bgcolor="pink"
                 )
             )
-        
-        page.add(
-            ft.Column(
-                items,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER
-            )
-        )
+
+        page.add(ft.Column([header, container, ft.Column(btns, alignment=ft.MainAxisAlignment.CENTER)], horizontal_alignment=ft.CrossAxisAlignment.CENTER))
         page.update()
 
     def show_shop():
-        page.clean()
-        
+        clear_and_update()
+
         card = ft.Container(
             content=ft.Column(
                 [
-                    # ИСПРАВЛЕНО: правильное название иконки "card_giftcard"
                     ft.Icon(name="card_giftcard", size=80, color="pink"),
                     ft.Text("Bilet do Szczęścia", size=20, weight="bold"),
-                    ft.Text(f"Cena: 1 róża", color="grey")
+                    ft.Text("Cena: 1 róża", color="grey")
                 ],
-                horizontal_alignment="center"
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
             padding=20,
             bgcolor="white",
             border_radius=15
         )
-        
+
         buy_btn = ft.ElevatedButton(
             text="KUPUJĘ ❤️",
             on_click=buy_ticket,
@@ -152,21 +159,22 @@ def main(page: ft.Page):
             height=50
         )
 
-        page.add(ft.Text("SKLEPIK MIŁOŚCI", size=28, weight="bold"), card, buy_btn)
+        page.add(ft.Column([ft.Text("SKLEPIK MIŁOŚCI", size=28, weight="bold"), card, buy_btn], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
         page.update()
 
     def show_final():
-        page.clean()
-        
+        clear_and_update()
+
         btn_yes = ft.ElevatedButton(
-            text="TAK! ❤️", 
-            on_click=win, 
-            bgcolor="green", 
+            text="TAK! ❤️",
+            on_click=win,
+            bgcolor="green",
             color="white",
-            width=140, 
+            width=140,
             height=60
         )
 
+        # кнопка 'нет' — уходит в случайную позицию при наведении/нажатии
         btn_no = ft.ElevatedButton(
             text="Nie",
             bgcolor="red",
@@ -175,7 +183,7 @@ def main(page: ft.Page):
             on_click=move_btn,
             width=80,
             height=40,
-            left=100, 
+            left=100,
             top=300
         )
 
@@ -194,10 +202,11 @@ def main(page: ft.Page):
             width=350,
             height=600
         )
-        
+
         page.add(game_area)
         page.update()
 
     show_quiz()
 
-ft.app(target=main)
+if __name__ == "__main__":
+    ft.app(target=main)
