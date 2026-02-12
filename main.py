@@ -78,10 +78,10 @@ def main(page: ft.Page):
         page.add(
             ft.Column(
                 [
-                    # ВМЕСТО ГИФКИ - БОЛЬШОЕ СЕРДЦЕ (Встроенная иконка)
-                    ft.Icon(name=ft.icons.FAVORITE, size=100, color="red"),
+                    # ИСПРАВЛЕНО: используем строковое название иконки
+                    ft.Icon(name="favorite", size=100, color="red"),
                     ft.Text("JEJ! KOCHAM CIĘ JULLI! ❤️", size=30, color="red", weight="bold", text_align="center"),
-                    ft.Text("Twój Vall! ❤️", size=18, weight="bold")
+                    ft.Text("Twój Vall!", size=18, weight="bold")
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
@@ -98,7 +98,6 @@ def main(page: ft.Page):
         items = [
             ft.Text(f"Pytanie {state['q_index']+1} z {len(questions)}", color="grey"),
             ft.Text(f"Róże: {state['score']} 🌹", size=20, color="red", weight="bold"),
-            # Убрали Border, просто белый фон
             ft.Container(
                 content=ft.Text(q["q"], size=22, weight="bold", text_align="center"),
                 padding=20,
@@ -132,8 +131,8 @@ def main(page: ft.Page):
         card = ft.Container(
             content=ft.Column(
                 [
-                    # ВМЕСТО ГИФКИ - ИКОНКА БИЛЕТА
-                    ft.Icon(name=ft.icons.CARD_GIFTCHARD, size=80, color="pink"),
+                    # ИСПРАВЛЕНО: правильное название иконки "card_giftcard"
+                    ft.Icon(name="card_giftcard", size=80, color="pink"),
                     ft.Text("Bilet do Szczęścia", size=20, weight="bold"),
                     ft.Text(f"Cena: 1 róża", color="grey")
                 ],
@@ -142,7 +141,6 @@ def main(page: ft.Page):
             padding=20,
             bgcolor="white",
             border_radius=15
-            # Убрали border, чтобы не было конфликтов версий
         )
         
         buy_btn = ft.ElevatedButton(
@@ -175,3 +173,31 @@ def main(page: ft.Page):
             color="white",
             on_hover=move_btn,
             on_click=move_btn,
+            width=80,
+            height=40,
+            left=100, 
+            top=300
+        )
+
+        game_area = ft.Stack(
+            [
+                ft.Container(
+                    content=ft.Text("Zostaniesz moją Walentynką?", size=26, weight="bold", text_align="center", color="pink900"),
+                    top=50, left=0, right=0, alignment=ft.alignment.center
+                ),
+                ft.Container(
+                    content=btn_yes,
+                    top=200, left=0, right=0, alignment=ft.alignment.center
+                ),
+                btn_no
+            ],
+            width=350,
+            height=600
+        )
+        
+        page.add(game_area)
+        page.update()
+
+    show_quiz()
+
+ft.app(target=main)
